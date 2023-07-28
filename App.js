@@ -15,40 +15,72 @@ import VideoCall from "./src/screens/VideoCall";
 import CallPayment from "./src/screens/CallPayment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
+import Map from "./src/screens/Map";
+import File from "./src/screens/File";
+import "react-native-gesture-handler";
+// import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Index from "./src/screens/Index";
+import Schedule from "./src/screens/Schedule";
+import Profile from "./src/screens/Profile";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { TransitionPresets } from "@react-navigation/stack";
+import HomeSlide from "./src/screens/HomeSlide";
+import Review from "./src/screens/Review";
+import AllDoctors from "./src/screens/AllDoctors";
+import BookingConfirmation from "./src/screens/BookingConfirmation";
+import Chat from "./src/screens/Chat";
+import ChatScreen from "./src/screens/ChatScreen";
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+// const Drawer = createDrawerNavigator();
+
 export default function App() {
   const [isLoggedIn, setLogin] = useState();
   useEffect(() => {
-    // if (AsyncStorage.getItem("user") !== null) {
-    //   setLogin(true);
-    // } else {
-    //   setLogin(false);
-    // }
-  }, [isLoggedIn]);
-  console.log(isLoggedIn);
+    getUser();
+  }, []);
+  // const getUser = async () => {
+  //   try {
+  //     AsyncStorage.getItem("user").then(value => {
+  //       if (value != null) {
+  //         setLogin(true);
+  //       }
+  //       else {
+  //         setLogin(false);
+  //       }
+  //     })
+
+  //   }
+  //   catch (err) {
+  //     console.log(err)
+  //   }
+  // }
+  const getUser = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem("user");
+      const currentUser = JSON.parse(savedUser);
+      if (currentUser != null) {
+        setLogin(true);
+      } else {
+        setLogin(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {isLoggedIn ? (
+        {/* {isLoggedIn ? (
           <Stack.Screen
-            name="Urgent"
-            component={Urgent}
+            name="Home"
+            component={HomeSlide}
             options={{
-              title: "Home",
-              headerStyle: {
-                backgroundColor: "#07da5f",
-                borderWidth: 0,
-                boxShadow: "none",
-              },
-              headerTintColor: "#fff",
-              headerTitleStyle: {
-                fontWeight: "bold",
-                fontSize: 20,
-              },
-              headerTitleAlign: "center",
-              headerLeft: null,
+              header: () => null,
+              ...TransitionPresets.SlideFromRightIOS,
             }}
           />
         ) : (
@@ -57,126 +89,99 @@ export default function App() {
             component={Welcome}
             options={{
               header: () => null,
+              ...TransitionPresets.SlideFromRightIOS,
             }}
           />
-        )}
-
+        )} */}
+        {/* <Stack.Screen
+            name="Map"
+            component={HomeSlide}
+            options={{
+              header: () => null,
+            }}
+          />  */}
         <Stack.Screen
+          name="Welcome"
+          component={Welcome}
+          options={{
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        /> 
+         <Stack.Screen
           name="Login"
           component={Login}
           options={{
             header: () => null,
-          }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={Signup}
-          options={{
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
+            ...TransitionPresets.SlideFromRightIOS,
           }}
         />
         <Stack.Screen
           name="Home"
           component={Home}
-          options={{ header: () => null }}
-        />
-           {/* <Stack.Screen
-            name="Urgent"
-            component={Urgent}
-            options={{
-              headerStyle: {
-                backgroundColor: "#07da5f",
-                borderWidth: 0,
-                boxShadow: "none",
-              },
-              headerTintColor: "#fff",
-              headerTitleStyle: {
-                fontWeight: "bold",
-                fontSize: 20,
-              },
-              headerTitleAlign: "center",
-              headerLeft: null,
-            }}
-          /> */}
-
-        <Stack.Screen
-          name="DoctorList"
-          component={DoctorList}
           options={{
-            title: "Doctor List",
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="Register"
+          component={Signup}
+          options={{
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        />
+        <Stack.Screen
+          name="Urgent"
+          component={Urgent}
+          options={{
             headerStyle: {
               backgroundColor: "#07da5f",
               borderWidth: 0,
               boxShadow: "none",
+              // height: 90,
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
               fontWeight: "bold",
-              fontSize: 20,
+              // fontSize: 26,
             },
             headerTitleAlign: "center",
+            headerLeft: null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        />
+        <Stack.Screen
+          name="DoctorList"
+          component={DoctorList}
+          options={{
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
           }}
         />
         <Stack.Screen
           name="DoctorDetails"
           component={DoctorDetails}
           options={{
-            title: "Doctor Details",
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
           }}
         />
         <Stack.Screen
           name="Notification"
           component={Notification}
           options={{
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
           }}
         />
         <Stack.Screen
           name="Appointment"
           component={Appointment}
           options={{
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
           }}
         />
         <Stack.Screen
@@ -184,24 +189,47 @@ export default function App() {
           component={VideoCall}
           options={{
             header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
           }}
         />
         <Stack.Screen
           name="CallPayment"
           component={CallPayment}
           options={{
-            title: "Call Payment",
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        />
+        <Stack.Screen
+          name="Review"
+          component={Review}
+          options={{
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        />
+        <Stack.Screen
+          name="AllDoctors"
+          component={AllDoctors}
+          options={{
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        />
+        <Stack.Screen
+          name="BookingConfirmation"
+          component={BookingConfirmation}
+          options={{
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
+          }}
+        />
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
+          options={{
+            header: () => null,
+            ...TransitionPresets.SlideFromRightIOS,
           }}
         />
       </Stack.Navigator>

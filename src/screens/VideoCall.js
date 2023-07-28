@@ -7,112 +7,105 @@ import {
   SafeAreaView,
   Pressable,
   Modal,
+  TextInput,
+  Alert,
+  TouchableOpacity,
+  ToastAndroid,
+  BackHandler,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Rating, AirbnbRating } from "react-native-ratings";
+import doctorService from "../services/doctorService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loader from "./Loader";
+// import ZegoUIKitPrebuiltCall, {
+//   ONE_ON_ONE_VIDEO_CALL_CONFIG,
+// } from "@zegocloud/zego-uikit-prebuilt-call-rn";
+import AgoraUIKit from "agora-rn-uikit";
 
-export default function VideoCall({ navigation }) {
+export default function VideoCall({ route, navigation }) {
+  const { data } = route.params;
+  const [details, setDetails] = useState();
   const [modalVisible, setModalVisible] = useState(false);
+  const [reviewModal, setModalReviewModal] = useState(false);
+  const [givenReview, setGivenReview] = useState("");
+  const [feedBack, setFeedBack] = useState("");
+  const [loading, setLoding] = React.useState(false);
+  const [user, setUser] = useState();
+  const [userId, setUserId] = useState();
+
+  const ratingCompleted = (rating) => {
+    setGivenReview(rating);
+  };
+
+  useEffect(() => {
+    getDetails();
+    getUser();
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => true
+    );
+    return () => backHandler.remove();
+  }, []);
+  const getUser = async () => {
+    try {
+      const userData = JSON.parse(await AsyncStorage.getItem("user"));
+      setUser(userData);
+      setUserId(userData?.id);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getDetails = async () => {
+    try {
+      const response = await doctorService.getDocotorDetails(data?.doctorId);
+
+      setDetails(response.data.doctor);
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Something went wrong");
+    }
+  };
+  const randomUserID = String(Math.floor(Math.random() * 100000));
+  const [videoCall, setVideoCall] = useState(true);
+  const connectionData = {
+    appId: "73c0e5ebacd548679c4cc54828496f88",
+    channel: "test",
+  };
+  const rtcCallbacks = {
+    EndCall: () => {
+      setVideoCall(false);
+      navigation.push("Review", {
+        doctorId: data?.doctorId,
+        userId: data?.userId,
+      });
+    },
+  };
+
   return (
-    <ImageBackground
-      source={require("./../../assets/video.jpg")}
-      style={styles.bgImage}>
-      <SafeAreaView style={styles.VideoView}>
-        <View style={styles.top}>
-          <Ionicons name="sync-outline" size={38} color="#fff" />
-          <View>
-            <Text style={styles.topHeading}>Doctor Jane Bintang</Text>
-            <Text style={styles.topHeading}>08:20</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={34} color="#fff" />
-        </View>
-        <View>
-          <Image
-            style={{
-              width: 110,
-              height: 142,
-              lineHeight: 27,
-              marginLeft: "auto",
-              marginBottom: 20,
-            }}
-            source={require("./../../assets/video-thumb.png")}></Image>
-          <View style={styles.bottom}>
-            <Pressable style={styles.buttonBorder}>
-              <Ionicons
-                name="mic"
-                size={38}
-                color="#fff"
-                style={{
-                  lineHeight: 55,
-                  margin: "auto",
-                  textAlign:"center"
-                }}
-              />
-        
-            </Pressable>
-            <Pressable
-              style={styles.buttonEnd}
-              onPress={() => navigation.navigate("CallPayment")}>
-              <Text style={styles.linkText}>
-              <Ionicons
-                name="call"
-                size={25}
-                color="#fff"
-                style={{
-                  lineHeight: 50,
-                  margin: "auto",
-                  marginRight: 18
-                }}
-              />
-               
-                <Text style={styles.endb}>End</Text>
-              </Text>
-            </Pressable>
-            <Pressable
-              style={styles.buttonBorder}
-              onPress={() => setModalVisible(true)}>
-            <Ionicons
-                name="videocam"
-                size={30}
-                color="#fff"
-                style={{
-                  lineHeight: 55,
-                  margin: "auto",
-                  textAlign:"center"
-                }}
-              />
-             
-            </Pressable>
-          </View>
-        </View>
-      </SafeAreaView>
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        onRequestClose={() => setModalVisible(!modalVisible)}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalHeading}>Video Reocrded</Text>
-            <Text style={styles.modalText}>
-              All these video conversations have been recorded automatically, do
-              you want to save them to your mobile?
-            </Text>
-            <View style={styles.modalBtns}>
-              <Pressable
-                style={styles.buttonNo}
-                onPress={() => setModalVisible(!modalVisible)}>
-                <Text style={styles.buttonNoText}>No</Text>
-              </Pressable>
-              <Pressable
-                style={styles.buttonGreen}
-                onPress={() => setModalVisible(!modalVisible)}>
-                <Text style={styles.buttonWhiteText}>Yes</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </ImageBackground>
+    <View style={{ flex: 1 }}>
+      <Loader visible={loading} />
+      {/* <ZegoUIKitPrebuiltCall
+        appID={25027312}
+        appSign="f4a63dd6698a958307a82b2892f6387e3cbab56ec504eb8e17724d3e01f0efb0"
+        userID={randomUserID}
+        userName={"user_" + randomUserID}
+        callID="testCallID"
+        config={{
+          ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
+          onHangUp: () => navigation.navigate("Review", { doctorId: doctorId }),
+        }}
+      /> */}
+      {videoCall ? (
+        <AgoraUIKit
+          connectionData={connectionData}
+          rtcCallbacks={rtcCallbacks}
+        />
+      ) : (
+        ""
+      )}
+    </View>
   );
 }
 
@@ -156,13 +149,15 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     width: 160,
     height: 55,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   linkText: {
     textAlign: "center",
     fontSize: 20,
     color: "#fff",
-
-
+    fontFamily: "Nunito_700Bold",
   },
   centeredView: {
     flex: 1,
@@ -174,16 +169,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 30,
     borderWidth: 0,
-    borderRadius: 6,
+    borderRadius: 4,
   },
   modalHeading: {
     color: "#37474e",
     fontSize: 22,
-    marginBottom: 30,
+    marginBottom: 20,
     textAlign: "center",
     letterSpacing: 1,
     lineHeight: 35,
-    fontFamily: "  Nunito_700Bold",
+    fontFamily: "Nunito_700Bold",
   },
   modalText: {
     color: "#607c8a",
@@ -191,7 +186,7 @@ const styles = StyleSheet.create({
     marginBottom: 35,
     textAlign: "center",
     letterSpacing: 1,
-    fontFamily:'Nunito_400Regular',
+    fontFamily: "Nunito_400Regular",
   },
   buttonGreen: {
     backgroundColor: "#07da5f",
@@ -199,7 +194,6 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 100,
     width: "46%",
-    
   },
   buttonWhiteText: {
     // fontFamily: "  Nunito_700Bold",
@@ -207,17 +201,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: 1,
     textAlign: "center",
-    fontFamily: "  Nunito_700Bold",
+    fontFamily: "Nunito_700Bold",
   },
   modalBtns: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   buttonNo: {
     borderColor: "#8fa4ad",
     borderWidth: 1,
     alignSelf: "stretch",
-    padding: 13,
+    padding: 12,
     borderRadius: 100,
     width: "46%",
   },
@@ -226,9 +221,82 @@ const styles = StyleSheet.create({
     color: "#8fa4ad",
     letterSpacing: 1,
     textAlign: "center",
-    fontFamily: "  Nunito_700Bold",
+    fontFamily: "Nunito_700Bold",
   },
-  endb:{
-    fontFamily: "  Nunito_700Bold",
-  }
+  endb: {
+    fontFamily: "Nunito_700Bold",
+  },
+  DoList: {
+    flexDirection: "row",
+    marginBottom: 0,
+    alignItems: "center",
+  },
+  Doimage: {
+    width: 65,
+    height: 65,
+    borderRadius: 100,
+  },
+  Docontent: {
+    marginLeft: 20,
+  },
+  Dotitle: {
+    color: "#37474e",
+    fontSize: 19,
+    marginBottom: 4,
+    fontFamily: "Nunito_600SemiBold",
+    textTransform: "capitalize",
+  },
+  Dotext: {
+    color: "#07da5f",
+    fontSize: 18,
+    fontStyle: "italic",
+    fontFamily: "Nunito_600SemiBold",
+    textTransform: "capitalize",
+  },
+
+  Dorating: {
+    fontSize: 18,
+    color: "#8fa4ae",
+    marginLeft: 5,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  Doratings: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 20,
+    marginTop: -30,
+  },
+  textarea: {
+    borderColor: "#ced8dc",
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingLeft: 18,
+    paddingRight: 18,
+    paddingTop: 15,
+    paddingBottom: 12,
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 16,
+    color: "#8fa4ad",
+    backgroundColor: "#fff",
+    borderStyle: "solid",
+    height: 100,
+    textAlignVertical: "top",
+  },
+  text: {
+    color: "#607c8a",
+    fontSize: 18,
+    marginBottom: 15,
+    letterSpacing: 1,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  NoText: {
+    color: "#607c8a",
+    fontSize: 18,
+    letterSpacing: 1,
+    textAlign: "center",
+    fontFamily: "Nunito_600SemiBold",
+  },
+  control: {
+    marginBottom: 20,
+  },
 });

@@ -6,229 +6,289 @@ import {
   Image,
   Pressable,
   ScrollView,
-  Alert
+  Alert,
+  TouchableOpacity,
+  RefreshControl,
+  TextInput,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import doctorService from "../services/doctorService";
+import Loader from "./Loader";
+import { hostUrl } from "../services/envService";
+import LottieView from "lottie-react-native";
 
-export default function DoctorList({ navigation }) {
+export default function DoctorList({ route, navigation }) {
   const [doctors, setDoctors] = useState();
+  const { doctorId } = route.params;
+  const { userId } = route.params;
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [loading, setLoding] = React.useState(true);
+
   useEffect(() => {
     getDocors();
   }, []);
+
   const getDocors = async () => {
     try {
-      const res = await doctorService.getAllDocotor();
-      console.log("res", res.data.doctor);
-      setDoctors(res.data.doctor);
+      const res = await doctorService.getAllDocotor(doctorId);
+      setDoctors(res.data);
+      setTimeout(async () => {
+        setLoding(false);
+      }, 1000);
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Something went wrong");
     }
   };
+  const handlerSearch = (searchQuery) => {
+    if (searchQuery === "") {
+      getDocors();
+    } else {
+      const filteredData = doctors.filter((item) =>
+        item.doctor_Name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setDoctors(filteredData);
+    }
+  };
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
+
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
+
   return (
-    <ScrollView>
+    <ScrollView
+      style={styles.bgBlue}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#07da5f"]}
+        />
+      }
+    >
+      <Loader visible={loading} />
+      <View style={styles.topBar}>
+        <Ionicons
+          onPress={() => navigation.goBack()}
+          style={styles.arrow}
+          name="chevron-back-outline"
+        />
+        <Text style={styles.topTitle}>Doctors</Text>
+        <Text></Text>
+      </View>
       <SafeAreaView style={styles.container}>
+        <View style={{ marginBottom: 15 }}>
+          {/* <Text style={styles.searchtitle}>Let's Find Your Doctor</Text> */}
+          <TextInput
+            onChangeText={(text) => {
+              handlerSearch(text);
+            }}
+            style={styles.input}
+            placeholder="Let's Find Your Doctor"
+            placeholderTextColor="#cfd8e1"
+          />
+          <Ionicons
+            name="search-outline"
+            size={25}
+            color="#cfd8e1"
+            style={{ position: "absolute", marginTop: 15, right: 20 }}
+          />
+        </View>
+
         {doctors && doctors?.length > 0 ? (
           doctors.map((list, i) => {
             return (
               <View style={styles.list} key={i}>
-                <Pressable
+                <TouchableOpacity
                   style={styles.inner}
                   onPress={() =>
-                    navigation.push("DoctorDetails", { doctorId:list._id })
-                  }>
+                    navigation.push("DoctorDetails", {
+                      doctorId: list._id,
+                      userId: userId,
+                    })
+                  }
+                >
                   <Image
                     style={styles.image}
-                    source={require("./../../assets/doctor-1.jpg")}></Image>
+                    source={{ uri: hostUrl + list.profile }}
+                  ></Image>
+
                   <View style={styles.content}>
                     <Text style={styles.title}>{list.doctor_Name}</Text>
-                    <Text style={styles.text}>{list.specialist}</Text>
-                    <Text style={styles.map}>
-                      <Ionicons
-                        name="location-outline"
-                        size={20}
-                        style={{ marginRight: 5 }}
-                      />
-                      {list.location}
-                    </Text>
+                    <View style={styles.viewOuts}>
+                      <Text style={styles.text}>{list.specialist}</Text>
+                      <View style={styles.ratings}>
+                        <Ionicons name="star" size={15} color="#ffd500" />
+                        <Text style={styles.rating}>{list.rating}</Text>
+                      </View>
+                    </View>
                   </View>
-                </Pressable>
-                <View style={styles.ratings}>
+                </TouchableOpacity>
+                {/* <View style={styles.ratings}>
                   <Ionicons name="star" size={19} color="#ffd500" />
                   <Text style={styles.rating}>{list.rating}</Text>
-                </View>
+                </View> */}
               </View>
             );
           })
         ) : (
-          <View style={styles.list}>
-            <Text style={styles.title}>No Data Found...!</Text>
+          <View style={styles.notFound}>
+            <LottieView
+              autoPlay
+              loop
+              speed={1}
+              style={{
+                width: 280,
+                marginLeft: "auto",
+                marginRight: "auto",
+                marginBottom: 10,
+              }}
+              source={require("../../assets/doctors-found.json")}
+            />
+            <Text style={styles.title}>No Doctors Found...!</Text>
           </View>
         )}
-
-        {/* <View style={styles.list}>
-        <Image
-          style={styles.image}
-          source={require("./../../assets/doctor-2.jpg")}></Image>
-        <View style={styles.content}>
-          <Text style={styles.title}>Nunung Brandon</Text>
-          <Text style={styles.text}>Eye Specialist</Text>
-          <Text style={styles.map}>
-          <Ionicons
-              name="location-outline"
-              size={22}
-              style={{ marginRight: 5 }}
-            />
-            St.Bronxlyn 212
-          </Text>
-        </View>
-        <View style={styles.ratings}>
-        <Ionicons name="star" size={19} color="#ffd500" />
-          <Text style={styles.rating}>4.2</Text>
-        </View>
-      </View>
-      <View style={styles.list}>
-        <Image
-          style={styles.image}
-          source={require("./../../assets/doctor-3.jpg")}></Image>
-        <View style={styles.content}>
-          <Text style={styles.title}>Udin Batakooran</Text>
-          <Text style={styles.text}>Eye Specialist</Text>
-          <Text style={styles.map}>
-            <Ionicons
-              name="location-outline"
-              size={22}
-              style={{ marginRight: 5 }}
-            />
-            St.Bronxlyn 212
-          </Text>
-        </View>
-        <View style={styles.ratings}>
-        <Ionicons name="star" size={19} color="#ffd500" />
-          <Text style={styles.rating}>3.9</Text>
-        </View>
-      </View>
-      <View style={styles.list}>
-        <Image
-          style={styles.image}
-          source={require("./../../assets/doctor-4.jpg")}></Image>
-        <View style={styles.content}>
-          <Text style={styles.title}>Cucup Joentravo</Text>
-          <Text style={styles.text}>Eye Specialist</Text>
-          <Text style={styles.map}>
-            <Ionicons
-              name="location-outline"
-              size={22}
-              style={{ marginRight: 5 }}
-            />
-            St.Bronxlyn 212
-          </Text>
-        </View>
-        <View style={styles.ratings}>
-        <Ionicons name="star" size={19} color="#ffd500" />
-          <Text style={styles.rating}>3.1</Text>
-        </View>
-      </View>
-      <View style={styles.list}>
-        <Image
-          style={styles.image}
-          source={require("./../../assets/doctor-5.jpg")}></Image>
-        <View style={styles.content}>
-          <Text style={styles.title}>Justin E. Carter</Text>
-          <Text style={styles.text}>Eye Specialist</Text>
-          <Text style={styles.map}>
-            <Ionicons
-              name="location-outline"
-              size={22}
-              style={{ marginRight: 5 }}
-            />
-            St.Bronxlyn 212
-          </Text>
-        </View>
-        <View style={styles.ratings}>
-        <Ionicons name="star" size={19} color="#ffd500" />
-          <Text style={styles.rating}>4.4</Text>
-        </View>
-      </View>
-      <View style={styles.list}>
-        <Image
-          style={styles.image}
-          source={require("./../../assets/doctor-2.jpg")}></Image>
-        <View style={styles.content}>
-          <Text style={styles.title}>Dwayne N. Soto</Text>
-          <Text style={styles.text}>Eye Specialist</Text>
-          <Text style={styles.map}>           
-            <Ionicons
-              name="location-outline"
-              size={22}
-              style={{ marginRight: 5 }}
-            />
-            St.Bronxlyn 212
-          </Text>
-        </View>
-        <View style={styles.ratings}>
-        <Ionicons name="star" size={19} color="#ffd500" />
-          <Text style={styles.rating}>2.9</Text>
-        </View>
-      </View> */}
       </SafeAreaView>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  bgBlue: {
+    flex: 1,
+    backgroundColor: "#555fd2",
+  },
   container: {
     flex: 1,
-    margin: 15,
+    backgroundColor: "#eff4fa",
+    borderTopLeftRadius: 45,
+    borderTopEndRadius: 45,
+    minHeight: 670,
+    resizeMode: "cover",
+    paddingTop: 40,
+    paddingBottom: 40,
+    paddingLeft: 25,
+    paddingRight: 25,
   },
   list: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    padding: 15,
+    padding: 12,
     marginBottom: 10,
     justifyContent: "space-between",
+    borderRadius: 15,
+    elevation: 20,
+    shadowColor: "#d7e9ff",
+    alignItems: "center",
+    width: "100%",
   },
   inner: {
     flexDirection: "row",
   },
   image: {
-    width: 75,
-    height: 75,
+    width: 65,
+    height: 65,
     borderRadius: 100,
   },
   content: {
-    marginLeft: 18,
+    marginLeft: 15,
     marginRight: 0,
+    marginTop: 4,
+    flex: 1,
+    paddingRight: 5,
   },
   title: {
-    color: "#37474e",
-    fontSize: 19,
+    color: "#193469",
+    fontSize: 17,
     marginBottom: 0,
-    fontFamily: "Nunito_600SemiBold",
+    fontFamily: "Poppins_600SemiBold",
+    textTransform: "capitalize",
   },
   text: {
-    color: "#07da5f",
-    fontSize: 16,
-    marginBottom: 5,
-    fontStyle: "italic",
-    fontFamily: "Nunito_400Regular",
+    color: "#cad0e0",
+    fontSize: 15,
+    marginBottom: 0,
+    // fontStyle: "italic",
+    fontFamily: "Poppins_400Regular",
+    textTransform: "capitalize",
   },
   map: {
     color: "#8fa4ae",
     fontSize: 16,
     textAlign: "left",
     marginLeft: -4,
-    fontFamily: "Nunito_400Regular",
+    fontFamily: "Poppins_400Regular",
+    textTransform: "capitalize",
   },
   rating: {
-    fontSize: 18,
-    color: "#8fa4ae",
-    marginLeft: 5,
-    fontFamily: "Nunito_400Regular",
+    fontSize: 14,
+    color: "#193469",
+    marginLeft: 3,
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: -5,
   },
   ratings: {
     flexDirection: "row",
+    alignItems: "center",
+  },
+  topBar: {
+    flexDirection: "row",
+    // justifyContent:"space-between",
+    paddingTop: 30,
+    paddingBottom: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
+    alignItems: "center",
+  },
+  arrow: {
+    fontSize: 32,
+    color: "#ffffff",
+    marginBottom: 5,
+    marginRight: 15,
+  },
+  topTitle: {
+    fontSize: 24,
+    color: "#fff",
+    fontFamily: "Poppins_600SemiBold",
+    textAlign: "center",
+  },
+  searchtitle: {
+    fontSize: 20,
+    color: "#193469",
+    textAlign: "left",
+    textTransform: "capitalize",
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: 4,
+  },
+  input: {
+    borderRadius: 12,
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingTop: 15,
+    paddingBottom: 12,
+    fontFamily: "Poppins_400Regular",
+    fontSize: 16,
+    color: "#193469",
+    backgroundColor: "#fff",
+  },
+  viewOuts: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignSelf: "stretch",
+  },
+  notFound: {
+    backgroundColor: "#fff",
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 15,
+    elevation: 20,
+    shadowColor: "#d7e9ff",
+    alignItems: "center",
+    width: "100%",
   },
 });

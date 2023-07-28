@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Telemedicine",
-    "slug": "Telemedicine",
+    "slug": "telemedicine",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#07da5f"
+      "backgroundColor": "#555fd2"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -19,21 +19,21 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.prasadvinutnaa.Telemedicine"
+      "bundleIdentifier": "com.telemedicine.Telemedicine"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.prasadvinutnaa.Telemedicine"
+      "package": "com.telemedicine.Telemedicine"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "fb57e127-95ab-42b4-b3b0-11c7c9a10114"
+        "projectId": "bf82eb6d-17bc-438e-8bed-a4f0f34c0029"
       }
     }
   }

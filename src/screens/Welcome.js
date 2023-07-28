@@ -1,35 +1,68 @@
 import {
   ImageBackground,
-  Pressable,
   StyleSheet,
   Text,
   View,
-  TouchableOpacity
+  TouchableOpacity,
+  Image,
+  SafeAreaView
+
 } from "react-native";
 import React from "react";
 import {
   useFonts,
-  Nunito_400Regular,
-  Nunito_600SemiBold,
-  Nunito_700Bold,
-} from "@expo-google-fonts/nunito";
-import AppLoading from 'expo-app-loading';
+  Poppins_100Thin,
+  Poppins_100Thin_Italic,
+  Poppins_200ExtraLight,
+  Poppins_200ExtraLight_Italic,
+  Poppins_300Light,
+  Poppins_300Light_Italic,
+  Poppins_400Regular,
+  Poppins_400Regular_Italic,
+  Poppins_500Medium,
+  Poppins_500Medium_Italic,
+  Poppins_600SemiBold,
+  Poppins_600SemiBold_Italic,
+  Poppins_700Bold,
+  Poppins_700Bold_Italic,
+  Poppins_800ExtraBold,
+  Poppins_800ExtraBold_Italic,
+  Poppins_900Black,
+  Poppins_900Black_Italic,
+} from '@expo-google-fonts/poppins';
 
 export default function Welcome({ navigation }) {
-    let [fontsLoaded, error] = useFonts({
-        Nunito_400Regular,
-        Nunito_600SemiBold,
-        Nunito_700Bold
-    })
+  let [fontsLoaded] = useFonts({
+    Poppins_100Thin,
+    Poppins_100Thin_Italic,
+    Poppins_200ExtraLight,
+    Poppins_200ExtraLight_Italic,
+    Poppins_300Light,
+    Poppins_300Light_Italic,
+    Poppins_400Regular,
+    Poppins_400Regular_Italic,
+    Poppins_500Medium,
+    Poppins_500Medium_Italic,
+    Poppins_600SemiBold,
+    Poppins_600SemiBold_Italic,
+    Poppins_700Bold,
+    Poppins_700Bold_Italic,
+    Poppins_800ExtraBold,
+    Poppins_800ExtraBold_Italic,
+    Poppins_900Black,
+    Poppins_900Black_Italic,
+  });
     if(!fontsLoaded){
-        return <AppLoading/>
-    }
+        return null
+    };
 
   return (
     <ImageBackground
-      source={require("./../../assets/splash-bg.png")}
-      style={styles.bgImage}>
+    source={require("./../../assets/splash-bg.png")}
+    style={styles.bgImage}
+  >
       <View style={styles.container}>
+      <Image source={require('../../assets/logo.png')} style={styles.logo}/>
         <Text style={styles.title}>Welcome</Text>
         <Text style={styles.text}>
           Lorem ipsum dolor sit amet, conse ctetur adipiscing elit, t. Ut enim
@@ -45,9 +78,9 @@ export default function Welcome({ navigation }) {
           style={styles.buttonBorder}>
           <Text style={styles.buttonWhiteText}>Login</Text>
         </TouchableOpacity>
-        <Pressable onPress={() => navigation.navigate("Urgent")}>
+        {/* <TouchableOpacity onPress={() => navigation.navigate("Urgent")}>
           <Text style={styles.linkText}>URGENT</Text>
-        </Pressable>
+        </TouchableOpacity> */}
       </View>
     </ImageBackground>
   );
@@ -56,65 +89,70 @@ const styles = StyleSheet.create({
   bgImage: {
     flex: 1,
     resizeMode: "cover",
-    backgroundColor: "#07da5f",
+    backgroundColor: "#555fd2",
   },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 30,
+    padding: 25,
   },
   title: {
-    fontSize: 40,
+    fontSize: 32,
     color: "#fff",
-    fontFamily:'Nunito_700Bold',
-    letterSpacing: 4,
-    marginBottom: 18,
+    fontFamily:'Poppins_600SemiBold',
+    marginBottom: 5,
     textAlign: "center",
   },
   text: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#fff",
-    fontFamily:'Nunito_400Regular',
-    letterSpacing: 1,
-    marginBottom: 100,
-    lineHeight: 24,
+    fontFamily:'Poppins_400Regular',
+    marginBottom: 50,
+    lineHeight: 26,
     textAlign: "center",
   },
   buttonWhite: {
-    backgroundColor: "#fff",
+    backgroundColor: "#4ce4b1",
     alignSelf: "stretch",
-    padding: 15,
+    padding: 13,
     borderRadius: 100,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   buttonGreenText: {
-    fontFamily:'Nunito_600SemiBold',
-    fontSize: 20,
-    color: "#07da5f",
-    letterSpacing: 1,
+    fontFamily:'Poppins_500Medium',
+    fontSize: 16,
+    color: "#fff",
     textAlign: "center",
+    textTransform:"uppercase"
   },
   buttonBorder: {
     borderColor: "#fff",
     borderWidth: 2,
     alignSelf: "stretch",
-    padding: 14,
+    padding: 12,
     borderRadius: 100,
-    marginBottom: 50,
+    marginBottom: 40,
   },
   buttonWhiteText: {
-    fontFamily:'Nunito_600SemiBold',
-    fontSize: 20,
+    fontFamily:'Poppins_500Medium',
+    fontSize: 16,
     color: "#fff",
-    letterSpacing: 1,
     textAlign: "center",
+    textTransform:"uppercase"
   },
   linkText: {
-    fontFamily:'Nunito_600SemiBold',
-    fontSize: 18,
+    fontFamily:'Poppins_600SemiBold',
+    fontSize: 16,
     color: "#fff",
-    letterSpacing: 2,
     textAlign: "center",
   },
+  logo:{
+    width:82,
+    height:85,  
+    marginBottom:25,
+    textAlign:"center",
+    marginLeft:'auto',
+    marginRight:'auto',
+  }
 });

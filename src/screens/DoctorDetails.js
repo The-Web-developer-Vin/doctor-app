@@ -6,192 +6,322 @@ import {
   Image,
   Pressable,
   ScrollView,
-  Alert
+  Alert,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import doctorService from '../services/doctorService';
-
+import doctorService from "../services/doctorService";
+import homeServices from "../services/homeServices";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Rating } from "react-native-rating-element";
+import Loader from "./Loader";
+import { hostUrl } from "../services/envService";
 
 export default function DoctorDetails({ route, navigation }) {
-  const [details, setDetails] = useState()
+  const [details, setDetails] = useState();
   const { doctorId } = route.params;
+  const { userId } = route.params;
+  const [loading, setLoding] = React.useState(true);
+
+  const [location, setLocation] = useState({
+    initialPosition: {
+      latitude: 13.08268,
+      longitude: 80.270721,
+      latitudeDelta: 0.00922,
+      longitudeDelta: 0.00421,
+    },
+  });
+
   useEffect(() => {
-    getDetails()
-  }, [])
-  const getDetails = async()=>{
-    try{
-      const response = await doctorService.getDocotorDetails(doctorId)
-      console.log("res", response)
-      setDetails(response.data.doctor)
-    }
-    catch(err){
-      console.log(err)
+    getDetails();
+  }, []);
+  const getDetails = async () => {
+    try {
+      const response = await doctorService.getDocotorDetails(doctorId);
+      let data = JSON.stringify(response.data.doctor);
+      setDetails(response.data.doctor);
+      setTimeout(async () => {
+        setLoding(false);
+      }, 1000);
+    } catch (err) {
+      console.log(err);
       Alert.alert("Error", "Something went wrong");
     }
-  }
-  
+  };
   return (
-    <ScrollView>
+    <ScrollView style={styles.white}>
+      <Loader visible={loading} />
+      <View style={styles.topBar}>
+        <Ionicons
+          onPress={() => navigation.goBack()}
+          style={styles.arrow}
+          name="chevron-back-outline"
+        />
+      </View>
       <SafeAreaView style={styles.container}>
-        <View style={styles.list}>
-          <Image
-            style={styles.image}
-            source={require("./../../assets/doctor-1.jpg")}></Image>
-          <View style={styles.content}>
-            <Text style={styles.title}>{details?.doctor_Name}</Text>
-            <Text style={styles.text}>{details?.specialist}</Text>
-            <View style={styles.ratings}>
-              <Ionicons
-                name="star"
-                size={20}
-                color="#ffd500"
-                style={{ marginRight: 8 }}
-              />
-              <Ionicons
-                name="star"
-                size={20}
-                color="#ffd500"
-                style={{ marginRight: 8 }}
-              />
-              <Ionicons
-                name="star"
-                size={20}
-                color="#ffd500"
-                style={{ marginRight: 8 }}
-              />
-              <Ionicons
-                name="star"
-                size={20}
-                color="#ffd500"
-                style={{ marginRight: 8 }}
-              />
-              <Ionicons
-                name="star-half"
-                size={20}
-                color="#ffd500"
-                style={{ marginRight: 10 }}
-              />
-
-              <Text style={styles.rating}>{details?.rating}</Text>
+        <View style={styles.listCont}>
+          <Text style={styles.title}>{details?.doctor_Name}</Text>
+          <View style={styles.list}>
+            <Image
+              style={styles.image}
+              source={{ uri: hostUrl + details?.profile }}
+            ></Image>
+            <View style={styles.content}>
+              <Text style={styles.text}>{details?.specialist}</Text>
+              {/* <Text style={styles.text}>MBBS,FCPS,FRCS ED FACS</Text> */}
+              <View style={styles.ratings}>
+                <Ionicons
+                  name="star"
+                  size={16}
+                  style={{ marginBottom: 5 }}
+                  color="#ffd500"
+                />
+                <Text style={styles.rating}>
+                  {details?.rating}{" "}
+                  <Text style={styles.reviews}>(32 Reviews)</Text>
+                </Text>
+              </View>
+              <View style={styles.options}>
+                <Ionicons
+                  style={styles.icon}
+                  color={"#f83458"}
+                  name="chatbox-outline"
+                />
+                <Ionicons
+                  style={styles.icon}
+                  color={"#18d59b"}
+                  name="call-outline"
+                />
+                <Ionicons
+                  style={styles.icon}
+                  color={"#1c73f4"}
+                  name="videocam-outline"
+                />
+              </View>
             </View>
           </View>
         </View>
-        <View style={styles.details}>
-          <Text style={styles.heading}>Short Description</Text>
-          <Text style={styles.desc}>
-          {details?.descripition}
-          </Text>
+        <View style={styles.bgouter}>
+          <View style={styles.details}>
+            <Text style={styles.heading}>About</Text>
+            <Text style={styles.desc}>{details?.descripition}</Text>
+          </View>
+          <View style={styles.details}>
+            <Text style={styles.heading}>Working Hours</Text>
+            <Text style={styles.desc}>
+              {" "}
+              <Ionicons size={18} color={"#cad0e0"} name="time-outline" />{" "}
+              Mon-Fri(09:00 AM - 10 PM)
+            </Text>
+          </View>
+          <View style={styles.details}>
+            <Text style={styles.heading}>Location</Text>
+            {/* <Text style={styles.desc}>
+              <Ionicons
+                name="location-outline"
+                size={19}
+                style={{ marginRight: 5 }}
+              />{" "}
+              {details?.location}
+            </Text> */}
+            {/* <Text style={styles.desc}>{details?.adress}</Text> */}
+          </View>
+          <View>
+            <MapView
+              style={styles.maps}
+              provider={PROVIDER_GOOGLE}
+              zoomEnabled={false}
+              scrollEnabled={false}
+              initialRegion={location.initialPosition}
+            >
+              <Marker
+                coordinate={{
+                  latitude: location.initialPosition.latitude,
+                  longitude: location.initialPosition.longitude,
+                }}
+                pinColor={"red"}
+                title={details?.location}
+                description={details?.adress}
+              />
+            </MapView>
+          </View>
+
+          <TouchableOpacity
+            onPress={() =>
+              navigation.push("Notification", {
+                doctorId: doctorId,
+                userId: userId,
+              })
+            }
+            style={styles.buttonGreen}
+          >
+            <Text style={styles.buttonWhiteText}>Book Appointment</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.details}>
-          <Text style={styles.heading}>Location</Text>
-          <Text style={styles.map}>
-            <Ionicons
-              name="location-outline"
-              size={24}
-              style={{ marginRight: 5 }}
-            />{" "}
-           {details?.location}
-          </Text>          
-          <Image
-            style={{ width: "100%", height: 200, marginTop: 30 }}
-            source={require("./../../assets/map.jpg")}></Image>
-        </View>
-        <Pressable
-          onPress={() => navigation.navigate("Notification")}
-          style={styles.buttonGreen}>
-          <Text style={styles.buttonWhiteText}>Request</Text>
-        </Pressable>
       </SafeAreaView>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  white: {
+    backgroundColor: "#555fd2",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingRight: 30,
-    paddingLeft: 30,
-    paddingTop: 30,
-    paddingBottom: 30,
+    backgroundColor: "#555fd2",
+  },
+  bgouter: {
+    backgroundColor: "#eff4fa",
+    borderTopLeftRadius: 45,
+    borderTopEndRadius: 45,
+    resizeMode: "cover",
+    paddingTop: 40,
+    paddingBottom: 40,
+    paddingLeft: 25,
+    paddingRight: 25,
+  },
+  listCont: {
+    marginBottom: 30,
+    paddingLeft: 20,
+    paddingRight: 20,
+    flexWrap: "nowrap",
   },
   list: {
     flexDirection: "row",
     marginBottom: 10,
-    borderBottomColor: "#eceff1",
-    borderBottomWidth: 1,
-    borderStyle: "solid",
-    paddingBottom: 25,
-    marginBottom: 28,
+    flexWrap: "wrap",
+    alignItems: "center",
   },
   image: {
-    width: 75,
-    height: 75,
+    width: 120,
+    height: 120,
     borderRadius: 100,
+    borderWidth: 3,
+    borderColor: "#fff",
   },
   content: {
-    marginLeft: 25,
-    marginRight: 20,
+    marginLeft: 20,
   },
   title: {
-    color: "#37474e",
-    fontSize: 20,
-    marginBottom: 4,
-    fontFamily: "Nunito_600SemiBold",
+    fontSize: 26,
+    color: "#fff",
+    textAlign: "left",
+    textTransform: "capitalize",
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: 5,
   },
   text: {
-    color: "#07da5f",
-    fontSize: 18,
-    marginBottom: 5,
-    fontStyle: "italic",
-    fontFamily: "Nunito_400Regular",
+    color: "#fff",
+    fontSize: 16,
+    marginBottom: 0,
+    fontFamily: "Poppins_500Medium",
   },
 
   rating: {
-    fontSize: 18,
-    color: "#8fa4ae",
+    fontSize: 16,
+    color: "#fff",
     marginLeft: 5,
-    fontFamily: "Nunito_600SemiBold",
+    fontFamily: "Poppins_500Medium",
   },
   ratings: {
     flexDirection: "row",
+    alignItems: "center",
   },
   heading: {
-    color: "#38474f",
-    fontSize: 24,
-    marginBottom: 12,
-    letterSpacing: 1,
-    fontFamily: "Nunito_600SemiBold",
+    fontSize: 20,
+    color: "#193469",
+    textAlign: "left",
+    textTransform: "capitalize",
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: 8,
   },
   desc: {
-    color: "#607c8a",
-    fontSize: 18,
-    fontFamily: "Nunito_400Regular",
+    color: "#62729b",
+    fontSize: 15,
+    fontFamily: "Poppins_400Regular",
     marginBottom: 5,
-    lineHeight: 28,
-    letterSpacing: 1,
+    lineHeight: 24,
+    flexDirection: "row",
+    alignItems: "center",
   },
   details: {
-    marginBottom: 35,
+    marginBottom: 30,
   },
   map: {
     color: "#8fa4ae",
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Nunito_400Regular",
-    marginLeft: -4,
+    marginLeft: -3,
+    textTransform: "capitalize",
+    marginBottom: 20,
+    textAlign: "left",
+  },
+  mapAdd: {
+    color: "#8fa4ae",
+    fontSize: 16,
+    fontFamily: "Nunito_400Regular",
+    marginLeft: -3,
+    textTransform: "capitalize",
+    textAlign: "left",
+    lineHeight: 24,
   },
   buttonGreen: {
-    backgroundColor: "#07da5f",
+    backgroundColor: "#4ce4b1",
     alignSelf: "stretch",
     padding: 15,
     borderRadius: 100,
   },
   buttonWhiteText: {
-    fontFamily: "  Nunito_700Bold",
-    fontSize: 18,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 16,
     color: "#fff",
-    letterSpacing: 1,
     textAlign: "center",
+  },
+  maps: {
+    height: 200,
+    with: "100%",
+    marginBottom: 30,
+    marginTop: -30,
+  },
+  topBar: {
+    flexDirection: "row",
+    // justifyContent:"space-between",
+    paddingTop: 30,
+    paddingBottom: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
+    alignItems: "center",
+  },
+  arrow: {
+    fontSize: 32,
+    color: "#ffffff",
+    marginBottom: 5,
+    marginRight: 15,
+  },
+  topTitle: {
+    fontSize: 24,
+    color: "#fff",
+    fontFamily: "Poppins_600SemiBold",
+    textAlign: "center",
+  },
+  reviews: {
+    color: "#a1a8ec",
+  },
+  options: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  icon: {
+    backgroundColor: "#fff",
+    width: 42,
+    height: 42,
+    fontSize: 20,
+    textAlign: "center",
+    lineHeight: 42,
+    borderRadius: 100,
   },
 });

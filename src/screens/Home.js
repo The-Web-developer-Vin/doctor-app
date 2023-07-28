@@ -1,191 +1,175 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
 import React from "react";
-import Urgent from "./Urgent";
+import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
-import Notification from "./Notification";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import Schedule from "./Schedule";
 import Profile from "./Profile";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Index from "../screens/Index";
+import Notifications from "./Notifications";
+import { TransitionPresets } from "@react-navigation/stack";
+import HomeSlide from "./HomeSlide";
+import Settings from "./Settings";
+import Help from "./Help";
+import DrawerContent from "./DrawerContent";
 
-export default function Home({ navigation }) {
-  const Tab = createBottomTabNavigator();
+export default function Home({ route, navigation }) {
+  const Drawer = createDrawerNavigator();
+  // const Drawer = createDrawerNavigator();
   return (
-    <NavigationContainer independent={true}>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
-            if (route.name === "Home") {
-              iconName = focused ? "home" : "home-outline";
-            } else if (route.name === "Notification") {
-              iconName = focused ? "notifications" : "notifications-outline";
-            } else if (route.name === "Schedule") {
-              iconName = focused ? "calendar" : "calendar-outline";
-            } else if (route.name === "Profile") {
-              iconName = focused ? "person" : "person-outline";
-            }
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: "#07da5f",
-          tabBarInactiveTintColor: "#8fa4ae",
-          tabBarStyle: {
-            height: 60,
-            shadowColor: "#171717",
-            shadowOffset: { width: -2, height: 4 },
-            shadowOpacity: 0.2,
-            shadowRadius: 5,
-            paddingBottom: 6,
-          },
-        })}>
-        <Tab.Screen
-          name="Home"
-          component={Urgent}
-          options={{
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
-            tabBarLabelStyle: {
-              fontSize: 13,
-            },
-          }}
-        />
-        <Tab.Screen
-          name="Notification"
-          component={Notification}
-          options={{
-            headerLeft: null,
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
-            tabBarLabelStyle: {
-              fontSize: 13,
-            },
-          }}
-        />
-        <Tab.Screen
-          name="add"
-          component={Notification}
-          options={{
-            headerLeft: null,
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
-            tabBarLabelStyle: {
-              fontSize: 13,
-              display: "none",
-            },
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons
-                name="add-outline"
-                style={styles.icons}
-                color="#fff"
-                size={30}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Schedule"
-          component={Schedule}
-          options={{
-            headerLeft: null,
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
-            tabBarLabelStyle: {
-              fontSize: 14,
-            },
-          }}
-        />
-        <Tab.Screen
-          name="Profile"
-          component={Profile}
-          options={{
-            headerLeft: null,
-            headerStyle: {
-              backgroundColor: "#07da5f",
-              borderWidth: 0,
-              boxShadow: "none",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-              fontSize: 20,
-            },
-            headerTitleAlign: "center",
-            tabBarLabelStyle: {
-              fontSize: 14,
-            },
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
-    // <View style={styles.container}>
-    //   <Text style={styles.buttonBorder}>VERY URGENT</Text>
-    //   <Urgent />
-    // </View>
+    <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />}>
+      <Drawer.Screen
+        name="HomeSlide"
+        options={{
+          header: () => null,
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+        component={HomeSlide}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          header: () => null,
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Drawer.Screen
+        name="Schedule"
+        component={Schedule}
+        options={{
+          header: () => null,
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          header: () => null,
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Drawer.Screen
+        name="Help"
+        component={Help}
+        options={{
+          header: () => null,
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+    </Drawer.Navigator>
+
+    // <Tab.Navigator
+    //   screenOptions={({ route }) => ({
+    //     tabBarIcon: ({ focused, color, size }) => {
+    //       let iconName;
+    //       if (route.name === "Index") {
+    //         iconName = focused ? "home" : "home-outline";
+    //       } else if (route.name === "Notification") {
+    //         iconName = focused ? "notifications" : "notifications-outline";
+    //       } else if (route.name === "Schedule") {
+    //         iconName = focused ? "calendar" : "calendar-outline";
+    //       } else if (route.name === "Profile") {
+    //         iconName = focused ? "person" : "person-outline";
+    //       }
+    //       return <Ionicons name={iconName} size={size} color={color} />;
+    //     },
+    //     tabBarActiveTintColor: "#07da5f",
+    //     tabBarInactiveTintColor: "#8fa4ae",
+    //     tabBarStyle: {
+    //       height: 60,
+    //       shadowColor: "#171717",
+    //       shadowOffset: { width: -2, height: 4 },
+    //       shadowOpacity: 0.2,
+    //       shadowRadius: 5,
+    //       paddingBottom: 6,
+    //     },
+    //   })}
+    // >
+    //   <Tab.Screen
+    //     style={styles.nav}
+    //     name="Index"
+    //     component={HomeSlide}
+    //     options={{
+    //       title: "Home",
+    //       header: () => null,
+    //       ...TransitionPresets.SlideFromRightIOS,
+    //       drawerIcon: ({ focused, size }) => (
+    //         <Ionicons
+    //           name="md-planet"
+    //           size={20}
+    //           color={focused ? "#2f37a4" : "#c7cbd7"}
+    //         />
+    //       ),
+    //     }}
+    //   />
+    //   <Tab.Screen
+    //     name="Notification"
+    //     component={Notifications}
+    //     options={{
+    //       drawerIcon: ({ focused, size }) => (
+    //         <Ionicons
+    //           name="notifications-outline"
+    //           size={20}
+    //           color={focused ? "#2f37a4" : "#c7cbd7"}
+    //         />
+    //       ),
+    //     }}
+    //   />
+    //   <Tab.Screen
+    //     name="Schedule"
+    //     component={Schedule}
+    //     options={{
+    //       drawerIcon: ({ focused, size }) => (
+    //         <Ionicons
+    //           name="calendar-outline"
+    //           size={20}
+    //           color={focused ? "#2f37a4" : "#c7cbd7"}
+    //         />
+    //       ),
+    //     }}
+    //   />
+    //   <Tab.Screen
+    //     name="Profile"
+    //     component={Profile}
+    //     options={{
+    //       drawerIcon: ({ focused, size }) => (
+    //         <Ionicons
+    //           name="person-outline"
+    //           size={20}
+    //           color={focused ? "#2f37a4" : "#c7cbd7"}
+    //         />
+    //       ),
+    //     }}
+    //   />
+    //   <Tab.Screen
+    //     name="Settings"
+    //     component={Settings}
+    //     options={{
+    //       drawerIcon: ({ focused, size }) => (
+    //         <Ionicons
+    //           name="settings-outline"
+    //           size={size}
+    //           color={focused ? "#7cc" : "#ccc"}
+    //         />
+    //       ),
+    //     }}
+    //   />
+    //   <Tab.Screen
+    //     name="Help"
+    //     component={Help}
+    //     options={{
+    //       drawerIcon: ({ focused, size }) => (
+    //         <Ionicons
+    //           name="help-circle-outline"
+    //           size={size}
+    //           color={focused ? "#7cc" : "#ccc"}
+    //         />
+    //       ),
+    //     }}
+    //   />
+    // </Tab.Navigator>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    // fontFamily: "Nunito_600SemiBold",
-  },
-  buttonBorder: {
-    borderColor: "#07da5f",
-    borderWidth: 2,
-    padding: 12,
-    borderRadius: 100,
-    marginTop: 40,
-    // fontFamily: "  Nunito_600SemiBold",
-    fontSize: 16,
-    color: "#07da5f",
-    letterSpacing: 1,
-    width: 180,
-    margin: "auto",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-
-  icons: {
-    backgroundColor: "#07da5f",
-    borderRadius: 100,
-    width: 50,
-    height: 50,
-    lineHeight: 52,
-    textAlign: "center",
-  },
-});
+const styles = StyleSheet.create({});
